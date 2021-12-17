@@ -4,37 +4,19 @@
         <div class="text-center mb-10">
             <h1 class="text-gray-50 font-semibold text-2xl mb-5">Ethereum NFT Creator</h1>
             <form @submit.prevent="createToken(name, description, eth, duration)">
-                <div  class="flex justify-evenly">
-                    <div>
-                        <label class="text-white">Token Name</label>
-                        <input v-model="name" class="rounded-md" type="text">
-                    </div>
-                    <div>
-                        <label class="text-white">Token Description</label>
-                        <input v-model="description" class="rounded-md" type="text">
-                    </div>
-                    <div>
-                        <label class="text-white">Initial ETH Amount</label>
-                        <input v-model="eth" class="rounded-md w-16" type="number" step="any">
-                    </div>
-                    <div>
-                        <label class="text-white">Auction Duration</label>
-                        <input v-model="duration" class="rounded-md w-16" type="number">
-                    </div>
-                </div>
 
                 <button class="bg-teal-500 py-2 px-4 rounded mt-5 text-white font-semibold">Generate</button>
             </form>
         </div>
 
-        <div class="grid grid-cols-3 gap-2">
+        <div class="p-10 grid grid-cols-3 gap-8">
             <div v-for="(token, index) in nft" :key="index" class="bg-gray-800 p-4 rounded-2xl w-64 grid gap-5 justify-center">
                 <div>
                     <img class="rounded-xl" src="../../public/image-equilibrium.jpg" alt="">
                 </div>
 
                 <div class="space-y-3">
-                    <h2 class="text-white text-xl font-bold">{{ token.name }} #{{ token.id }}</h2>
+                    <h2 class="text-white text-xl font-bold capitalize">{{ token.name }} #{{ token.id }}</h2>
                     <p class="text-gray-400">{{ token.description }}</p>
                 </div>
 
@@ -55,6 +37,7 @@
 </template>
 
 <script setup>
+import axios from 'axios'
 import { reactive, ref } from 'vue';
 
     const name = ref('')
@@ -62,17 +45,7 @@ import { reactive, ref } from 'vue';
     const eth = ref(null)
     const duration = ref(null)
 
-    const nft = reactive(
-        [
-            {
-        name: 'Equilibrium',
-        id: 3429,
-        description: 'Our Equilibrium collection promotes balance and calm',
-        eth: 0.041,
-        duration: 3,
-            },
-        ]
-    )
+    const nft = reactive([])
 
     class NFT {
         constructor(name, id, description, eth, duration){
@@ -84,12 +57,24 @@ import { reactive, ref } from 'vue';
         }
     }
 
-    const createToken = (name, description, eth, duration) => {
-        
-        const generateID = Math.floor(Math.random() * (10000 - 1000 + 1) + 1000)
-        const newNft = new NFT(name, generateID, description,eth, duration )
+    const createToken = () => {
+        axios.get('https://random-word-api.herokuapp.com/word?number=1')
+        .then(response => {
+
+            const generateID = Math.floor(Math.random() * (10000 - 1000 + 1) + 1000)
+
+            const getDuration = Math.floor(Math.random() * (10 - 2 + 1) + 2)
+
+            const generate = Math.random() * 10
+
+            const startingBid =  Number.parseFloat(generate).toFixed(4)
+
+        const newNft = new NFT(response.data[0], generateID, description,startingBid, getDuration )
         nft.push(newNft)
+        })        
     }
+
+    createToken()
     
 
 
