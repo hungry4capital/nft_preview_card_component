@@ -2,7 +2,8 @@
     <div class="min-h-screen bg-gray-900">
 
         <div class="text-center mb-10">
-            <h1 class="text-gray-50 font-semibold text-2xl mb-3">Ethereum NFT Card Generator</h1>
+            <h1 class="text-gray-50 font-semibold text-2xl mb-3">Ethereum NFT Pokemon Card Generator</h1>
+            <p class="text-gray-400 mb-5">There isn't too much logic in this project. Just a few random generators</p>
                 
                 <div class="space-x-2">
                     <button @click="createToken" class="bg-teal-500 py-2 px-4 rounded mt-2 text-white font-semibold">Generate</button>
@@ -12,11 +13,11 @@
                 
         </div>
         
-        <div class="rounded-lg my-8 max-w-2xl mx-auto py-8 px-4 sm:px-6 md:max-w-3xl lg:max-w-5xl lg:px-8 shadow-xl">
+        <div class="rounded-lg max-w-2xl mx-auto py-8 px-4 sm:px-6 md:max-w-3xl lg:max-w-5xl lg:px-8 shadow-xl shadow-gray-800">
             <div class="p-5 max-w-6xl grid grid-cols-1 place-items-center md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div v-for="(token, index) in nft" :key="index" class="bg-gray-800 p-4 rounded-2xl w-64 grid gap-5 justify-center">
                     <div>
-                        <img class="rounded-xl" src="../../public/image-equilibrium.jpg" alt="">
+                        <img class="rounded-xl h-32 mx-auto" :src="token.image" alt="">
                     </div>
 
                     <div class="space-y-3">
@@ -54,30 +55,38 @@ import paragraph from '../composables/getTokenTitle'
     let nft = reactive([])
 
     class NFT {
-        constructor(name, id, description, eth, duration){
+        constructor(name, id, description, eth, duration, image){
             this.name = name,
             this.id = id,
             this.description = description,
             this.eth = eth,
-            this.duration = duration
+            this.duration = duration,
+            this.image = image
         }
     }
 
-    const tokenTitle = ref('')
+    const image = ref('')
 
-    const createToken = async () => {       
+    const tokenTitle = ref('')
+    const pokeName = ref('')
+
+    const createToken = async () => {     
+
 
             if(nft.length < 6 && nft.length >= 0) {
                 try {
-                    const getToken = await axios.get(
-                    "https://random-word-api.herokuapp.com/word?number=1&swear=0"
-                    );
+                    const generateID = Math.floor(Math.random() * (100 - 2 ) + 2)     
 
-                    tokenTitle.value = getToken.data[0]
+                    const poke = await axios.get(`https://pokeapi.co/api/v2/pokemon-form/${generateID}`)
+
+                    
+                    image.value = poke.data.sprites.front_default                 
+                    
+                    pokeName.value = poke.data.name
 
                 } catch (e) {
                     console.log(e);
-                } 
+                }
 
                 const generateID = Math.floor(Math.random() * (10000 - 1000 + 1) + 1000)
 
@@ -89,13 +98,16 @@ import paragraph from '../composables/getTokenTitle'
 
                 const getParagraph = paragraph[Math.floor(Math.random() * (10 - 1) + 1)]
 
-                const newNft = new NFT(tokenTitle.value, generateID, getParagraph,startingBid, getDuration )
+                const newNft = new NFT(pokeName.value, generateID, getParagraph,startingBid, getDuration, image.value )
                 nft.push(newNft)
         }    
+
+        if(nft.length > 6) {
+            nft.length = 6
+        }
     }
 
     const reset = () => {
-        console.log(nft.length)
         nft.length = 0
         createToken()
     }
